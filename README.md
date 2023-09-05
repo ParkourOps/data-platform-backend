@@ -13,7 +13,51 @@ Simply clone or fork this project.
 
 Forking is recommended to allow for downstream merging of future improvements.
 
-After cloning, see the sample API implementation in the `src` directory.
+After cloning or forking, see the sample API implementation in the `src` directory.
+
+### How to Fork
+
+To create a new project based on this framework, do not use the 'fork' feature of GitHub. Instead, follow these steps:
+
+1. On GitHub, create a new __empty__ repository (let's call this the __project repo__).
+
+2. `git clone` the __project repo__ locally and `cd` into it.
+
+3. Add __this repository__ as an upstream remote to the local __project repo__ clone, we will name the remote `framework`.:
+
+    ```bash
+
+      git remote add framework https://github.com/ParkourOps/parkour-json
+
+    ```
+
+4. Create a local branch on the __project repo__ clone called `framework` which will reflect the `main` branch of __this repository__.
+
+    ```bash
+
+      git fetch framework main
+      
+      git checkout -b framework --track framework/main
+
+    ```
+
+5. Create the `main` branch on the __project repo__.
+
+    ```bash
+
+      git checkout -b main
+
+      git push -u origin main
+
+    ```
+
+6. Install the Node dependencies and get developing!
+
+    ```bash
+
+      npm install
+
+    ```
 
 ## Work to Do
 
