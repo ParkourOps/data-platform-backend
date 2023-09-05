@@ -1,7 +1,7 @@
 import { z } from "zod";
 import { makeMiddleware } from "@framework";
 
-export default makeMiddleware("Authentication", (request, exit)=>{
+export default makeMiddleware("Authentication", async (request, exit)=>{
     const auth = request.headers.authorization;
     try {
         z.string().regex(/^Bearer [a-zA-Z0-9]+$/).parse(auth);

@@ -30,7 +30,7 @@ export class JsonRestApiRoute<
         args: {
             request: RequestSchema<A,B,C,D>, 
             response: ResponseSchema<F,G,H,I>, 
-            handler: (input: D) => JsonRestApiResponse<I>,
+            handler: (request: D) => Promise<JsonRestApiResponse<I>>,
             middleware?: JsonRestApiControllerMiddlewareStack
     }) 
     {
@@ -41,7 +41,7 @@ export class JsonRestApiRoute<
         this.handler = args.handler;
         this.#middleware = args.middleware;
     }
-    handle(request: Request, response: Response) {
+    async handle(request: Request, response: Response) {
         let rawRequest : Request | undefined = request;
         const responder = makeResponder<I|undefined>(response);
         // 1. parse request body
@@ -51,11 +51,11 @@ export class JsonRestApiRoute<
         }
         // 2. run middleware stack if present
         if (this.#middleware) {
-            rawRequest = runMiddlewareStack(this.#middleware, rawRequest, responder);
+            rawRequest = await runMiddlewareStack(this.#middleware, rawRequest, responder);
             if (!rawRequest) return;
         }
         //run the handler
-        const result = this.handler(parseRequestBodyResult.data);
+        const result = await this.handler(parseRequestBodyResult.data);
         return responder.respond(result);
     }
 }

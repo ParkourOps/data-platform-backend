@@ -12,7 +12,7 @@ export default makeRoute(
         middleware: [
             auth
         ],
-        handler(input){
+        async handler(input){
             return {
                 status: 200,
                 userFriendlyMessage: `PONG right back at you, ${input.user}.`,
