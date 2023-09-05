@@ -1,5 +1,5 @@
 import { startNewServer } from "@framework";
-import pkg from "./package.json";
+import pkg from "../package.json";
 import postPing from "@routes/postPing";
 
 startNewServer(process.env.PORT ? parseInt(process.env.PORT) : 3000, {

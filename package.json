@@ -4,8 +4,8 @@
   "description": "A concise, typed, and declarative way to implement a JSON API server.",
   "main": "index.js",
   "scripts": {
-    "dev": "nodemon app.ts",
-    "run": "ts-node app.ts",
+    "dev": "nodemon src/app.ts",
+    "run": "ts-node src/app.ts",
     "lint": "eslint . --ext .ts"
   },
   "keywords": [
@@ -47,6 +47,6 @@
   },
   "repository": {
     "type": "git",
-    "url": ""
+    "url": "https://github.com/ParkourOps/parkour-json"
   }
 }
