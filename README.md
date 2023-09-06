@@ -63,11 +63,13 @@ To create a new project based on this framework, do not use the 'fork' feature o
 
 In order of precedent:
 
+- [ ] Implement global middleware.
+
+- [ ] Implement an OPTIONS handler on all possible routes which should respond with concise representation of the API good enough to be used as user documentation.
+
 - [ ] Implement unit tests.
 
 - [ ] Implement functional tests.
-
-- [ ] Implement an OPTIONS handler on all possible routes which should respond with concise representation of the API good enough to be used as user documentation.
 
 - [ ] Documentation!
 
