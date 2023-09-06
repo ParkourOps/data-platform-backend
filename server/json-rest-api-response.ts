@@ -1,9 +1,9 @@
 import { Response } from "express"
-import { HttpResponseStatus } from "./http"
 import { UnknownKeysParam, ZodObject, ZodRawShape, ZodTypeAny, ZodUndefined } from "zod";
+import { HttpResponseStatusCode } from "./http";
 
 export type JsonRestApiResponse<T> = {
-    status: HttpResponseStatus,
+    status: HttpResponseStatusCode,
     userFriendlyMessage: string,
     data: T
 }

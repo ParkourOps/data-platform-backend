@@ -1,28 +1,40 @@
-import { JsonRestApi } from "./json-rest-api";
 import {Server as HttpServer} from "http";
 import express, { NextFunction } from "express"
+import { JsonRestApiRouteAny, loadRoutesFromPath } from "./json-rest-api-route";
+import { BAD_REQUEST_RESPONSE, makeResponder } from "./json-rest-api-response";
 import { emit } from "./event-bus";
-import { makeResponder } from "./json-rest-api-response";
 type Request = express.Request;
 type Response = express.Response;
 
+
 class Server {
-    #serverApp
-    #server: HttpServer | undefined
-    #spec
-    constructor(spec: JsonRestApi) {
-        console.info(`creating server: ${spec.name}`)
+    readonly name
+    readonly description
+    readonly version
+    readonly routes
+    readonly #serverApp
+    #serverInstance: HttpServer | undefined
+
+    private constructor(
+        name: string,
+        description: string,
+        version: string,
+        routes: JsonRestApiRouteAny[]
+    ) {
+        console.info(`creating server: ${name}`);
+        this.name = name;
+        this.description = description;
+        this.version = version;
+        this.routes = routes;
         // create server app
         this.#serverApp = express();
+        // use json middleware
         this.#serverApp.use(express.json());
+        // handle errors at the top-level
         this.#serverApp.use((error: Error, request: Request, response: Response, next: NextFunction) => {
             const responder = makeResponder(response);
             if (error instanceof SyntaxError) {
-                responder.respond({
-                    status: 400,
-                    userFriendlyMessage: "Request is not a valid JSON.",
-                    data: undefined
-                })
+                responder.respond(BAD_REQUEST_RESPONSE("Request is not a valid JSON."));
             } else {
                 next();
             }
@@ -30,17 +42,41 @@ class Server {
         // listen to exit sigs
         process.on("SIGINT", ()=>this.stop("SIGINT received."));
         process.on("SIGTERM", ()=>this.stop("SIGTERM received."));
-        // initialise the server using spec
-        this.#spec = spec;
-        this.#initialise();
+        // install
+        this.#installRoutes();
+        console.info(`created server: ${name}`);
     }
-    #initialise() {
+
+    stop(why: string) {
+        if (!this.#serverInstance) return;
+        this.#serverInstance.close();
+        console.info(`\nserver '${this.name}' stopped: ${why}`);
+        emit("serverStopped", this.name, why);
+    }
+
+    start(port: number) {
+        this.#serverInstance = this.#serverApp.listen(port, ()=>{
+            console.info(`server '${this.name}' started on port: ${port}`);
+            emit("serverStarted", this.name, port);
+        });
+    }
+
+    static async make(
+        name: string,
+        description: string,
+        version: string,
+        routesDir: string
+    ) {
+        const routes = await loadRoutesFromPath(routesDir);
+        return new Server(name, description, version, routes);
+    }
+
+    #installRoutes() {
         if (!this.#serverApp) return;
-        // add handlers for the specific path entries
-        this.#spec.routes.forEach((route) => {
+        this.routes.forEach((route)=>{
+            const handler = (req:Request, res:Response)=>route.handler.handle.call(route.handler, req, res);
             const method = route.method;
             const path = route.path;
-            const handler = (req:Request, res:Response)=>route.handle.call(route, req, res)
             switch (method) {
                 case 'POST': 
                     this.#serverApp.post(path, handler);
@@ -59,27 +95,22 @@ class Server {
                     break;
             }
             console.info(`installed: ${method} ${path}`);
-        })
-        // TODO: add OPTIONS on root and all subsequent paths here
-    }
-    stop(why: string) {
-        if (!this.#server) return;
-        this.#server.close();
-        console.info(`\nserver '${this.#spec.name}' stopped: ${why}`);
-        emit("serverStopped", this.#spec.name, why);
-    }
-    start(port: number) {
-        this.#server = this.#serverApp.listen(port, ()=>{
-            console.info(`server '${this.#spec.name}' started on port: ${port}`);
-            emit("serverStarted", this.#spec.name, port);
         });
-    }
+    }    
 }
 
-export function startNewServer(port: number, spec: JsonRestApi) {
-    const server = new Server(spec);
+
+
+
+export async function startNewServer(args: {
+    name: string,
+    description: string,
+    version: string,
+    routesDir: string
+}, port: number) {
+    const server = await Server.make(args.name, args.description, args.version, args.routesDir);
     server.start(port);
 }
 export { makeMiddleware } from "./json-rest-api-middleware";
-export { makeRoute } from "./json-rest-api";
+export { makeRouteHandler} from "./json-rest-api-route-handler";
 export { on as onServerEvent } from "./event-bus";

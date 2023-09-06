@@ -1,14 +1,24 @@
-export type HttpRequestMethod = "POST" | "GET" | "PUT" | "PATCH" | "DELETE";
+export const httpRequestMethod = [
+    "POST",
+    "GET",
+    "PUT",
+    "PATCH",
+    "DELETE"
+];
 
-export type HttpResponseStatus = 
-                        | 200 // OK
-                        | 204 // NO CONTENT
-                        | 400 // BAD REQUEST
-                        | 401 // UNAUTHORISED
-                        | 403 // FORBIDDEN
-                        | 404 // NOT FOUND
-                        | 405 // METHOD NOT ALLOWED
-                        | 500 // INTERNAL SERVER ERROR
-                        | 501 // NOT IMPLEMENTED
-                        | 503 // SERVICE UNAVAILABLE
-;
+export const httpResponseStatus = {
+    OK: 200,
+    CREATED: 201,
+    NO_CONTENT: 204,
+    BAD_REQUEST: 400,
+    UNAUTHORISED: 401,
+    FORBIDDEN: 403,
+    NOT_FOUND: 404,
+    METHOD_NOT_ALLOWED: 405,
+    INTERNAL_SERVER_ERROR: 500,
+    NOT_IMPLEMENTED: 501, 
+    SERVICE_UNAVAILABLE: 503,
+} as const;
+
+type HttpResponseStatusName = keyof typeof httpResponseStatus;
+export type HttpResponseStatusCode = typeof httpResponseStatus[HttpResponseStatusName];

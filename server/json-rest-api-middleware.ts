@@ -8,10 +8,10 @@ type JsonRestApiControllerMiddleware<
 > = (request: TInputRequest, exit: (response: JsonRestApiResponse<TResponseData>)=>void) => Promise<TOutputRequest>;
 
 
-export function makeMiddleware<TName extends string, TResponseData = unknown>(name: TName, fn: JsonRestApiControllerMiddleware<TResponseData>) {
+export function makeMiddleware<TName extends string, TResponseData = unknown>(name: TName, handler: JsonRestApiControllerMiddleware<TResponseData>) {
     return {
         name,
-        fn
+        handler
     }
 }
 
@@ -34,7 +34,7 @@ export async function runMiddlewareStack(stack: JsonRestApiControllerMiddlewareS
         console.info(`running middleware #${count}: ${middleware.name}`);
         count++;
         // run this middleware
-        req = await middleware.fn(req, exiter);
+        req = await middleware.handler(req, exiter);
         // if this middleware set the exit flag, time to leave the function!
         if (<boolean>exit === true) {
             return;

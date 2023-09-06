@@ -1,6 +1,6 @@
 import { UnknownKeysParam, ZodObject, ZodRawShape, ZodTypeAny } from "zod";
 
-export type RequestSchema<
+export type QuerySchema<
     A extends ZodRawShape,
     B extends UnknownKeysParam,
     C extends ZodTypeAny,
