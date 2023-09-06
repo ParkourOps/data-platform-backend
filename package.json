@@ -4,8 +4,8 @@
   "description": "A concise, typed, and declarative way to implement a JSON API server.",
   "main": "index.js",
   "scripts": {
-    "dev": "nodemon src/app.ts",
-    "run": "ts-node src/app.ts",
+    "dev": "nodemon -r dotenv/config src/app.ts",
+    "run": "ts-node -r dotenv/config src/app.ts",
     "lint": "eslint . --ext .ts"
   },
   "keywords": [
@@ -42,6 +42,7 @@
     "typescript": "^5.2.2"
   },
   "dependencies": {
+    "dotenv": "^16.3.1",
     "express": "^4.18.2",
     "zod": "^3.22.2"
   },
