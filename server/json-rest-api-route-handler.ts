@@ -31,18 +31,21 @@ export class JsonRestApiRouteHandler<
     L extends ZodTypeAny,
     M,
 > {
+    readonly description
     readonly requestDataSchema
     readonly responseDataSchema
     readonly querySchema
     readonly handler
     readonly #middleware
     constructor(args: {
+        description: string,
         request: RequestSchema<A,B,C,D>, 
         response: ResponseSchema<F,G,H,I>, 
         query?: QuerySchema<J,K,L,M>,
         middleware?: JsonRestApiControllerMiddlewareStack,
         handler: (request: D, params: RouteParameters, query?: M) => Promise<JsonRestApiResponse<I>>
     }){
+        this.description = args.description;
         this.requestDataSchema = args.request;
         this.responseDataSchema = args.response;
         this.querySchema = args.query;
@@ -53,12 +56,17 @@ export class JsonRestApiRouteHandler<
         console.log(request.params);
         let rawRequest : Request | undefined = request;
         const responder = makeResponder<I|undefined>(response);
-        // 1. parse request body
+        // 1. run middleware stack if present
+        if (this.#middleware) {
+            rawRequest = await runMiddlewareStack(this.#middleware, rawRequest, responder);
+            if (!rawRequest) return;
+        }
+        // 2. parse request body
         const parseRequestBodyResult = this.requestDataSchema.safeParse(rawRequest.body);
         if (!parseRequestBodyResult.success) {
             return responder.respond(BAD_REQUEST_RESPONSE("Request does not match schema. Please see OPTIONS response."));
         }
-        // 2. parse request query, but only if present in request
+        // 3. parse request query, but only if present in request
         let query : M | undefined;
         if (Object.keys(request.query).length > 0 && this.querySchema) {
             const parseRequestQueryResult = this.querySchema.safeParse(request.query);
@@ -69,11 +77,6 @@ export class JsonRestApiRouteHandler<
             }
         } else if (Object.keys(request.query).length > 0 && !this.querySchema) {
             return responder.respond(BAD_REQUEST_RESPONSE("This route does not accept queries. Please see OPTIONS response."));
-        }
-        // 3. run middleware stack if present
-        if (this.#middleware) {
-            rawRequest = await runMiddlewareStack(this.#middleware, rawRequest, responder);
-            if (!rawRequest) return;
         }
         // run the handler
         const result = await this.handler(parseRequestBodyResult.data, request.params, query);
