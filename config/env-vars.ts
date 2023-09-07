@@ -3,15 +3,15 @@ export type EnvironmentVariableType = "string" | "number" | "boolean";
 export function loadOptionalEnvironmentVariable(
   key: string,
   asType: Extract<EnvironmentVariableType, "string">
-): string;
+): string | undefined;
 export function loadOptionalEnvironmentVariable(
   key: string,
   asType: Extract<EnvironmentVariableType, "number">
-): number;
+): number | undefined;
 export function loadOptionalEnvironmentVariable(
   key: string,
   asType: Extract<EnvironmentVariableType, "boolean">
-): boolean;
+): boolean
 export function loadOptionalEnvironmentVariable(
   key: string,
   asType: EnvironmentVariableType
@@ -24,7 +24,7 @@ export function loadOptionalEnvironmentVariable(
     case "boolean":
       return ["true", "yes", "y", "1"].includes(val.toLowerCase()) ? true : false;
     default:
-      return val as string;
+      return val;
   }
 }
 

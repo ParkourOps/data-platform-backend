@@ -53,7 +53,6 @@ export class JsonRestApiRouteHandler<
         this.handler = args.handler;
     }
     async handle(request: Request, response: Response) {
-        console.log(request.params);
         let rawRequest : Request | undefined = request;
         const responder = makeResponder<I|undefined>(response);
         // 1. run middleware stack if present
@@ -64,6 +63,7 @@ export class JsonRestApiRouteHandler<
         // 2. parse request body
         const parseRequestBodyResult = this.requestDataSchema.safeParse(rawRequest.body);
         if (!parseRequestBodyResult.success) {
+            console.error("Request does not match schema. Please see OPTIONS response.", JSON.stringify(parseRequestBodyResult.error));
             return responder.respond(BAD_REQUEST_RESPONSE("Request does not match schema. Please see OPTIONS response."));
         }
         // 3. parse request query, but only if present in request
