@@ -4,6 +4,7 @@ import auth from "@middleware/auth";
 
 export default makeRouteHandler(
     {
+        description: "Ping pong implementation: takes messages that must be 'PING' and responds with 'PONG' back to the user.",
         request: z.object({
             msg: z.literal("PING")
         }),
