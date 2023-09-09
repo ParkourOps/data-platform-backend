@@ -5,8 +5,10 @@ import { z } from "zod";
 import firebase from "../../firebase";
 import { makeRouteHandler } from "../../../server/json-rest-api-route-handler";
 import { httpResponseStatus } from "../../../server/http";
+import locale from "../../locale";
 
 export default makeRouteHandler({
+    description: "Get own user profile if logged in.",
     request: z.object({
         auth: Auth
     }),
@@ -15,25 +17,25 @@ export default makeRouteHandler({
         authRequired
     ],
     async handler(request) {
-        const rawUserRecord = (await firebase.firestore.collection("user").doc(request.auth.uid).get()).data();
-        if (rawUserRecord) {
-            try {
+        try {
+            const data = (await firebase.firestore.collection("user").doc(request.auth.uid).get()).data();
+            if (data) {
                 return {
                     status: httpResponseStatus.OK,
-                    userFriendlyMessage: "User profile found.",
-                    data: UserProfile.parse(rawUserRecord)
-                }
-            } catch {
+                    userFriendlyMessage: locale.resourceRead("user profile"),
+                    data: UserProfile.parse(data)
+                }     
+            } else {
                 return {
-                    status: httpResponseStatus.INTERNAL_SERVER_ERROR,
-                    userFriendlyMessage: "Failed to parse user profile.",
+                    status: httpResponseStatus.NOT_FOUND,
+                    userFriendlyMessage: locale.resourceNotFound("user profile"),
                     data: undefined
                 }
             }
-        } else {
+        } catch {
             return {
-                status: httpResponseStatus.NOT_FOUND,
-                userFriendlyMessage: "User profile not found.",
+                status: httpResponseStatus.INTERNAL_SERVER_ERROR,
+                userFriendlyMessage: locale.resourceReadFail("user profile"),
                 data: undefined
             }
         }

@@ -6,6 +6,7 @@ import { generateUniqueId } from "../../../utils/random-generators";
 import { httpResponseStatus } from "../../../../server/http";
 
 export default makeRouteHandler({
+    description: "Get a randomly-generated project ID.",
     request: z.object({
         auth: Auth
     }),

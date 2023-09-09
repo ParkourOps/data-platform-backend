@@ -3,7 +3,7 @@ import { makeMiddleware } from "@framework";
 import firebase from "../firebase";
 
 export default makeMiddleware("Authentication Required (Guard)", async (request, exit)=>{
-    const auth = request.headers.authorization?.replace("Bearer ", "");
+    const auth = request.headers.authorization?.replace(/^(bearer )/i, "");
     try {
         if (!auth) {
             throw Error();
